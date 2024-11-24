@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Tile Puzzle</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <h1 class="text-3xl font-bold mb-4">Sliding Tile Puzzle</h1>
+    <div id="puzzle" class="grid grid-cols-3 gap-2 mb-4">
+        <!-- Tiles will be dynamically generated here -->
+    </div>
+    <button onclick="startGame()" class="px-4 py-2 bg-blue-500 text-white rounded">Start Game</button>
+    <div id="timer" class="mt-4 text-xl"></div>
+
+    <script>
+        const puzzle = document.getElementById('puzzle');
+        const timerElement = document.getElementById('timer');
+        let timer;
+        let startTime;
+
+        function initializePuzzle() {
+            puzzle.innerHTML = '';
+            const tiles = [];
+            for (let i = 1; i <= 8; i++) {
+                tiles.push(i);
+            }
+            tiles.push('');
+
+            // Shuffle tiles
+            tiles.sort(() => Math.random() - 0.5);
+
+            tiles.forEach(tile => {
+                const tileElement = document.createElement('div');
+                tileElement.className = 'tile w-24 h-24 bg-blue-300 flex items-center justify-center text-2xl font-bold';
+                tileElement.textContent = tile;
+                tileElement.onclick = () => moveTile(tileElement);
+                puzzle.appendChild(tileElement);
+            });
+        }
+
+        function moveTile(tileElement) {
+            const emptyTile = Array.from(puzzle.children).find(tile => tile.textContent === '');
+            const tileIndex = Array.from(puzzle.children).indexOf(tileElement);
+            const emptyIndex = Array.from(puzzle.children).indexOf(emptyTile);
+
+            const validMoves = [
+                emptyIndex - 1, // left
+                emptyIndex + 1, // right
+                emptyIndex - 3, // up
+                emptyIndex + 3  // down
+            ];
+
+            if (validMoves.includes(tileIndex)) {
+                [tileElement.textContent, emptyTile.textContent] = [emptyTile.textContent, tileElement.textContent];
+                checkWin();
+            }
+        }
+
+        function checkWin() {
+            const tiles = Array.from(puzzle.children).map(tile => tile.textContent);
+            const winningTiles = ['1', '2', '3', '4', '5', '6', '7', '8', ''];
+
+            if (tiles.every((tile, index) => tile === winningTiles[index])) {
+                clearInterval(timer);
+                alert('Congratulations! You solved the puzzle!');
+            }
+        }
+
+        function startGame() {
+            initializePuzzle();
+            startTime = new Date();
+            timer = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            const elapsedTime = Math.floor((new Date() - startTime) / 1000);
+            timerElement.textContent = `Time: ${elapsedTime} seconds`;
+        }
+
+        // Initialize the puzzle on page load
+        initializePuzzle();
+    </script>
+</body>
+</html>
